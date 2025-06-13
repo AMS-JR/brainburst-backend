@@ -8,26 +8,33 @@ import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 
 import java.util.Map;
 
-public class UserAuthHandler implements RequestHandler<Map<String,Object>, String> {
+public class UserAuthHandler implements RequestHandler<Map<String, Object>, Map<String, Object>> {
+
     private final DynamoDbClient db = DynamoDbClient.create();
+
     @Override
-    public String handleRequest(Map<String,Object> input, Context ctx) {
-        Map<String,String> claims = (Map<String,String>) input.get("claims");
-        String username = claims.get("cognito:username");
-        String email = claims.get("email");
+    public Map<String, Object> handleRequest(Map<String, Object> input, Context context) {
+        try {
+            Map<String, Object> request = (Map<String, Object>) input.get("request");
+            Map<String, String> attributes = (Map<String, String>) request.get("userAttributes");
 
-        // Insert if not exists
-        db.putItem(PutItemRequest.builder()
-                .tableName(System.getenv("USERS_TABLE"))
-                .item(Map.of(
-                        "username", AttributeValue.fromS(username),
-                        "email", AttributeValue.fromS(email),
-                        "highestScore", AttributeValue.fromN("0"),
-                        "totalGamesPlayed", AttributeValue.fromN("0")
-                ))
-                .conditionExpression("attribute_not_exists(username)")
-                .build());
+            String username = attributes.get("sub");
+            String email = attributes.get("email");
 
-        return "OK";
+            db.putItem(PutItemRequest.builder()
+                    .tableName(System.getenv("USERS_TABLE"))
+                    .item(Map.of(
+                            "username", AttributeValue.fromS(username),
+                            "email", AttributeValue.fromS(email),
+                            "highestScore", AttributeValue.fromN("0"),
+                            "totalGamesPlayed", AttributeValue.fromN("0")
+                    ))
+                    .conditionExpression("attribute_not_exists(username)")
+                    .build());
+        } catch (Exception e) {
+            context.getLogger().log("Failed to insert user: " + e.getMessage());
+        }
+
+        return input; // Must return original event
     }
 }
