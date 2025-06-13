@@ -4,7 +4,10 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.brainburst.auth.UserAuthHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
 import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
@@ -15,12 +18,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class LeaderboardHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+    private static final Logger logger = LoggerFactory.getLogger(LeaderboardHandler.class);
     private final DynamoDbClient db = DynamoDbClient.create();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context ctx) {
         try {
+            logger.info("Fetching leaderboard data...");
+
             ScanResponse resp = db.scan(ScanRequest.builder()
                     .tableName(System.getenv("SCORES_TABLE"))
                     .build());
@@ -40,12 +46,15 @@ public class LeaderboardHandler implements RequestHandler<APIGatewayProxyRequest
                     })
                     .collect(Collectors.toList());
 
+            logger.info("Fetched {} leaderboard entries", topScores.size());
+
             String jsonBody = objectMapper.writeValueAsString(topScores);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
                     .withHeaders(Map.of("Content-Type", "application/json"))
                     .withBody(jsonBody);
         } catch (Exception e) {
+            logger.error("Failed to get leaderboard: {}", e.getMessage(), e);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(500)
                     .withBody("{\"error\": \"Failed to get leaderboard\"}");

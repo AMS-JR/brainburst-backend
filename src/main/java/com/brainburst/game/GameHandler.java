@@ -4,14 +4,17 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.brainburst.auth.UserAuthHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
 public class GameHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
-
+    private static final Logger logger = LoggerFactory.getLogger(GameHandler.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -23,6 +26,8 @@ public class GameHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
         question.put("question", a + " + " + b + " = ?");
         question.put("answer", a + b);
 
+        logger.info("Generated question: {} + {}", a, b);
+
         try {
             String body = objectMapper.writeValueAsString(question);
             return new APIGatewayProxyResponseEvent()
@@ -30,6 +35,7 @@ public class GameHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
                     .withHeaders(Map.of("Content-Type", "application/json"))
                     .withBody(body);
         } catch (Exception e) {
+            logger.error("Failed to generate question: {}", e.getMessage(), e);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(500)
                     .withBody("{\"error\": \"Failed to generate question\"}");
