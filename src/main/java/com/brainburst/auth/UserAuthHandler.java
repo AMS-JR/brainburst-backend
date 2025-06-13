@@ -18,13 +18,13 @@ public class UserAuthHandler implements RequestHandler<Map<String, Object>, Map<
             Map<String, Object> request = (Map<String, Object>) input.get("request");
             Map<String, String> attributes = (Map<String, String>) request.get("userAttributes");
 
-            String username = attributes.get("sub");
+            String userId = attributes.get("sub");
             String email = attributes.get("email");
 
             db.putItem(PutItemRequest.builder()
                     .tableName(System.getenv("USERS_TABLE"))
                     .item(Map.of(
-                            "username", AttributeValue.fromS(username),
+                            "userId", AttributeValue.fromS(userId),
                             "email", AttributeValue.fromS(email),
                             "highestScore", AttributeValue.fromN("0"),
                             "totalGamesPlayed", AttributeValue.fromN("0")
