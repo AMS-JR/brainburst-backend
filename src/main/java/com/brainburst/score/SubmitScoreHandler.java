@@ -22,6 +22,8 @@ public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequest
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context ctx) {
+        logger.info("=== TEST LOG ===");
+        System.out.println("=== SYSTEM OUT LOG ===");
         try {
             logger.info("Received score submission: {}", event.getBody());
 
