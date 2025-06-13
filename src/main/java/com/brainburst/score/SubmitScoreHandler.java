@@ -16,6 +16,10 @@ import java.util.Map;
 import java.util.UUID;
 
 public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+    static {
+        System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(SubmitScoreHandler.class);
     private final DynamoDbClient db = DynamoDbClient.create();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -24,6 +28,7 @@ public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequest
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context ctx) {
         logger.info("=== TEST LOG ===");
         System.out.println("=== SYSTEM OUT LOG ===");
+        logger.error("This is a test ERROR log");
         try {
             logger.info("Received score submission: {}", event.getBody());
 
