@@ -22,7 +22,6 @@ public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequest
     }
 
 
-
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context ctx) {
 
@@ -35,6 +34,7 @@ public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequest
             Map<String, Object> input = objectMapper.readValue(event.getBody(), Map.class);
             String username = (String) input.get("user");
             int score = ((Number) input.get("score")).intValue();
+            String gameLevel = (String) input.get("level");
             String email = (String) input.get("email");
 
             if (username == null || email == null || score < 0) {
@@ -50,11 +50,11 @@ public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequest
                     score
             );
 
-            if (dataSourceHandler.isInTop10(scoreId)) {
+            if (dataSourceHandler.isInTop10(scoreId, gameLevel)) {
 
-                String message = String.format("Congratulations, %s! Your score of %d has made it to the top 10 on the leaderboard!",
+                String message = String.format("\uD83C\uDFC6 Congratulations, %s! Your score of %d has made it to the top 10 on the leaderboard!",
                         username, score);
-                emailHandler.sendEmail(email, "Top 10 Leaderboard Notification", message);
+                emailHandler.sendEmail(email, "Top 10 " + gameLevel + "Leaderboard Notification", message);
 
             }
 

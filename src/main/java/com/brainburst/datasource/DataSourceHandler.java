@@ -37,7 +37,7 @@ public class DataSourceHandler {
         return instance;
     }
 
-    public String insertScore( String username, int score) {
+    public String insertScore(String username, int score) {
         String scoreId = UUID.randomUUID().toString();
         try {
             db.putItem(PutItemRequest.builder()
@@ -57,14 +57,15 @@ public class DataSourceHandler {
         }
     }
 
-    public boolean isInTop10(String scoreId) {
+    public boolean isInTop10(String scoreId, String gameLevel) {
         try {
             ScanRequest scanRequest = ScanRequest.builder()
                     .tableName(tableName)
-                    .projectionExpression("scoreId, score")
+                    .projectionExpression("scoreId, score, level")
                     .build();
 
             List<Map<String, AttributeValue>> topScores = db.scan(scanRequest).items().stream()
+                    .filter(row -> row.containsKey("level") && gameLevel.equals(row.get("level").s()))
                     .sorted((a, b) -> Integer.compare(
                             Integer.parseInt(b.get("score").n()),
                             Integer.parseInt(a.get("score").n())
