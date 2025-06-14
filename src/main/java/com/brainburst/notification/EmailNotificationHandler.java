@@ -21,15 +21,17 @@ public class EmailNotificationHandler {
                     System.getenv("SES_SENDER_EMAIL"),
                     "SES_SENDER_EMAIL environment variable is missing"
             );
-            context.getLogger().log("SES EmailHandler initialized for production use.");
         } catch (Exception e) {
-            context.getLogger().log("SES EmailHandler initialization failed" + "\nException:" + e);
-            throw e;
+            // Logging is delayed until context is available
+            throw new RuntimeException("Failed to initialize EmailNotificationHandler", e);
         }
     }
 
     public static EmailNotificationHandler getInstance(Context context) {
         instance.context = context;
+        if (context != null) {
+            context.getLogger().log("EmailNotificationHandler instance initialized.\n");
+        }
         return instance;
     }
 
@@ -55,10 +57,14 @@ public class EmailNotificationHandler {
                     .build();
 
             sesClient.sendEmail(emailRequest);
-            context.getLogger().log("Email sent via SES to: " + toEmail);
+           if (context != null) {
+                context.getLogger().log("Email sent via SES to: " + toEmail + "\n");
+            }
 
         } catch (SesException e) {
-            context.getLogger().log("Failed to send SES email to:" + toEmail + "\nException:" + e.awsErrorDetails().errorMessage());
+            if (context != null) {
+                context.getLogger().log("Failed to send SES email to: " + toEmail + "\nException: " + e.awsErrorDetails().errorMessage() + "\n");
+            }
         }
     }
 }
