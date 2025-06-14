@@ -21,8 +21,14 @@ public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequest
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context ctx) {
         LambdaLogger logger = ctx.getLogger();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try {
             logger.log("Received score submission: " + event.getBody() + "\n");
+
+            logger.log("ENVIRONMENT VARIABLES: " + gson.toJson(System.getenv()));
+            logger.log("CONTEXT: " + gson.toJson(context));
+            // process event
+            logger.log("EVENT: " + gson.toJson(event));
 
             Map<String, Object> input = objectMapper.readValue(event.getBody(), Map.class);
             String username = (String) input.get("user");
