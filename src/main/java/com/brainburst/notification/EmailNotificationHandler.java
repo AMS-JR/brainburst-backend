@@ -1,8 +1,7 @@
 package com.brainburst.notification;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.amazonaws.services.lambda.runtime.Context;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.*;
 
@@ -12,8 +11,8 @@ public class EmailNotificationHandler {
 
     private static final EmailNotificationHandler instance = new EmailNotificationHandler();
     private final SesClient sesClient;
-    private final Logger logger = LoggerFactory.getLogger(EmailNotificationHandler.class);
     private final String senderEmail;
+    private Context context;
 
     private EmailNotificationHandler() {
         try {
@@ -22,14 +21,15 @@ public class EmailNotificationHandler {
                     System.getenv("SES_SENDER_EMAIL"),
                     "SES_SENDER_EMAIL environment variable is missing"
             );
-            logger.info("SES EmailHandler initialized for production use.");
+            context.getLogger().log("SES EmailHandler initialized for production use.");
         } catch (Exception e) {
-            logger.error("SES EmailHandler initialization failed", e);
+            context.getLogger().log("SES EmailHandler initialization failed" + "\nException:" + e);
             throw e;
         }
     }
 
-    public static EmailNotificationHandler getInstance() {
+    public static EmailNotificationHandler getInstance(Context context) {
+        instance.context = context;
         return instance;
     }
 
@@ -55,10 +55,10 @@ public class EmailNotificationHandler {
                     .build();
 
             sesClient.sendEmail(emailRequest);
-            logger.info("Email sent via SES to: {}", toEmail);
+            context.getLogger().log("Email sent via SES to: " + toEmail);
 
         } catch (SesException e) {
-            logger.error("Failed to send SES email to {}: {}", toEmail, e.awsErrorDetails().errorMessage());
+            context.getLogger().log("Failed to send SES email to:" + toEmail + "\nException:" + e.awsErrorDetails().errorMessage());
         }
     }
 }
