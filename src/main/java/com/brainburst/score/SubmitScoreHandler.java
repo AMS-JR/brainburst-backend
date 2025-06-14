@@ -26,7 +26,7 @@ public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequest
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try {
             logger.log("Received score submission: " + event.getBody() + "\n");
-            logger.log("AMADOU SARJO JALLOW LOVES RO");
+            logger.log("RO IS SEXY");
             // process event
             logger.log("EVENT: " + gson.toJson(event));
 
