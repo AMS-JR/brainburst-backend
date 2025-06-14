@@ -39,7 +39,7 @@ public class DataSourceHandler {
                             "scoreId", AttributeValue.fromS(scoreId),
                             "user", AttributeValue.fromS(username),
                             "score", AttributeValue.fromN(Integer.toString(score)),
-                            "level", AttributeValue.fromS(level),
+                            "gameLevel", AttributeValue.fromS(level),
                             "timestamp", AttributeValue.fromS(Instant.now().toString())
                     ))
                     .build());
@@ -57,11 +57,11 @@ public class DataSourceHandler {
         try {
             ScanRequest scanRequest = ScanRequest.builder()
                     .tableName(tableName)
-                    .projectionExpression("scoreId, score, level")
+                    .projectionExpression("scoreId, score, gameLevel")
                     .build();
 
             List<Map<String, AttributeValue>> topScores = db.scan(scanRequest).items().stream()
-                    .filter(row -> row.containsKey("level") && gameLevel.equals(row.get("level").s()))
+                    .filter(row -> row.containsKey("gameLevel") && gameLevel.equals(row.get("gameLevel").s()))
                     .sorted((a, b) -> Integer.compare(
                             Integer.parseInt(b.get("score").n()),
                             Integer.parseInt(a.get("score").n())
