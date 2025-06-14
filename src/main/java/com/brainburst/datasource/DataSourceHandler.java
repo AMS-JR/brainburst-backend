@@ -1,7 +1,6 @@
 package com.brainburst.datasource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.amazonaws.services.lambda.runtime.Context;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
@@ -17,42 +16,39 @@ import java.util.UUID;
 public class DataSourceHandler {
 
     private static final DataSourceHandler instance = new DataSourceHandler();
+    private Context context;
     private final DynamoDbClient db;
     private final String tableName;
-    private final Logger logger = LoggerFactory.getLogger(DataSourceHandler.class);
 
     private DataSourceHandler() {
-        try {
-            db = DynamoDbClient.create();
-            tableName = Objects.requireNonNull(
-                    System.getenv("SCORES_TABLE"),
-                    "SCORES_TABLE environment variable is missing"
-            );
-        } catch (Exception e) {
-            throw new IllegalStateException("DatabaseHandler initialization failed", e);
-        }
+        db = DynamoDbClient.create();
+        tableName = Objects.requireNonNull(System.getenv("SCORES_TABLE"), "SCORES_TABLE environment variable is missing");
     }
 
-    public static DataSourceHandler getInstance() {
+    public static DataSourceHandler getInstance(Context context) {
+        instance.context = context;
         return instance;
     }
 
-    public String insertScore(String username, int score) {
+    public String insertScore(String username, int score, String level) {
         String scoreId = UUID.randomUUID().toString();
         try {
             db.putItem(PutItemRequest.builder()
                     .tableName(tableName)
                     .item(Map.of(
-                            "scoreId", AttributeValue.fromS(UUID.randomUUID().toString()),
+                            "scoreId", AttributeValue.fromS(scoreId),
                             "user", AttributeValue.fromS(username),
                             "score", AttributeValue.fromN(Integer.toString(score)),
+                            "level", AttributeValue.fromS(level),
                             "timestamp", AttributeValue.fromS(Instant.now().toString())
-                    )).build());
-            logger.info("Inserted score {} for user {}", score, username);
+                    ))
+                    .build());
 
+            context.getLogger().log(String.format("Inserted score %d for user %s%n", score, username));
             return scoreId;
+
         } catch (Exception e) {
-            logger.error("Failed to insert score for user: {}", username, e);
+            context.getLogger().log(String.format("Failed to insert score for user %s: %s%n", username, e.getMessage()));
             throw e;
         }
     }
@@ -76,11 +72,8 @@ public class DataSourceHandler {
             return topScores.stream()
                     .anyMatch(item -> item.get("scoreId").s().equals(scoreId));
         } catch (Exception e) {
-            logger.error("Failed to check top 10 for scoreId: {}", scoreId, e);
-            throw e;
+            context.getLogger().log(String.format("Failed to check top 10 for scoreId: %s. Error: %s%n", scoreId, e.getMessage()));
+            return false;
         }
     }
-
-
 }
-
