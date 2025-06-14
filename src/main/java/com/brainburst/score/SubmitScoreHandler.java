@@ -12,12 +12,9 @@ import java.util.Map;
 
 public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-    private final EmailNotificationHandler emailHandler = EmailNotificationHandler.getInstance();
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    static {
-        System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
-    }
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context ctx) {
@@ -39,12 +36,13 @@ public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequest
                         .withBody("{\"error\": \"Missing or invalid user, score, or level.\"}");
             }
 
-            // Get DataSourceHandler with current context
+
             DataSourceHandler dataSourceHandler = DataSourceHandler.getInstance(ctx);
 
             String scoreId = dataSourceHandler.insertScore(username, score, gameLevel);
 
             if (dataSourceHandler.isInTop10(scoreId, gameLevel)) {
+                EmailNotificationHandler emailHandler = EmailNotificationHandler.getInstance(ctx);
                 String message = String.format(
                         "\uD83C\uDFC6 Congratulations, %s! Your score of %d has made it to the top 10 on the %s leaderboard!",
                         username, score, gameLevel
