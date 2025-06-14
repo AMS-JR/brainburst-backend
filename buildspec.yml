@@ -4,13 +4,16 @@ phases:
   install:
     runtime-versions:
       java: corretto21
+    commands:
+      - echo Installing dependencies
+      - mvn clean install
+
   build:
     commands:
-      - mvn clean package
-      - mkdir -p build
-      - cp target/*.jar build/
-      - cd build && zip lambda-deploy.zip *.jar && cd ..
+      - echo Build started
+      - mvn package
 
 artifacts:
   files:
-    - build/lambda-deploy.zip
+    - target/brainburst-backend-1.0-SNAPSHOT.jar
+  discard-paths: yes
