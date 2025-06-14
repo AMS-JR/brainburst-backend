@@ -1,9 +1,8 @@
 package com.brainburst.auth;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
@@ -11,11 +10,12 @@ import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 import java.util.Map;
 
 public class UserAuthHandler implements RequestHandler<Map<String, Object>, Map<String, Object>> {
-    private static final Logger logger = LoggerFactory.getLogger(UserAuthHandler.class);
     private final DynamoDbClient db = DynamoDbClient.create();
 
     @Override
     public Map<String, Object> handleRequest(Map<String, Object> input, Context context) {
+        LambdaLogger logger = context.getLogger();
+
         try {
             Map<String, Object> request = (Map<String, Object>) input.get("request");
             Map<String, String> attributes = (Map<String, String>) request.get("userAttributes");
@@ -23,7 +23,7 @@ public class UserAuthHandler implements RequestHandler<Map<String, Object>, Map<
             String userId = attributes.get("sub");
             String email = attributes.get("email");
 
-            logger.info("Registering new user: {} ({})", userId, email);
+            logger.log("Registering new user: " + userId + " (" + email + ")\n");
 
             db.putItem(PutItemRequest.builder()
                     .tableName(System.getenv("USERS_TABLE"))
@@ -36,10 +36,10 @@ public class UserAuthHandler implements RequestHandler<Map<String, Object>, Map<
                     .conditionExpression("attribute_not_exists(username)")
                     .build());
 
-            logger.info("User registered successfully.");
+            logger.log("User registered successfully.\n");
 
         } catch (Exception e) {
-            context.getLogger().log("Failed to insert user: " + e.getMessage());
+            logger.log("Failed to insert user: " + e.getMessage() + "\n");
         }
 
         return input; // Must return original event

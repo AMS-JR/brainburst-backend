@@ -1,12 +1,11 @@
 package com.brainburst.score;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
@@ -16,21 +15,14 @@ import java.util.Map;
 import java.util.UUID;
 
 public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
-    static {
-        System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
-    }
-
-    private static final Logger logger = LoggerFactory.getLogger(SubmitScoreHandler.class);
     private final DynamoDbClient db = DynamoDbClient.create();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context ctx) {
-        logger.info("=== TEST LOG ===");
-        System.out.println("=== SYSTEM OUT LOG ===");
-        logger.error("This is a test ERROR log");
+        LambdaLogger logger = ctx.getLogger();
         try {
-            logger.info("Received score submission: {}", event.getBody());
+            logger.log("Received score submission: " + event.getBody() + "\n");
 
             Map<String, Object> input = objectMapper.readValue(event.getBody(), Map.class);
             String username = (String) input.get("user");
@@ -45,14 +37,14 @@ public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequest
                             "timestamp", AttributeValue.fromS(Instant.now().toString())
                     )).build());
 
-            logger.info("Score submitted for user {}: {}", username, score);
+            logger.log("Score successfully submitted for user: " + username + " with score: " + score + "\n");
 
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
                     .withHeaders(Map.of("Content-Type", "application/json"))
                     .withBody("{\"message\": \"Score submitted!\"}");
         } catch (Exception e) {
-            logger.error("Failed to submit score: {}", e.getMessage(), e);
+            logger.log("ERROR submitting score: " + e.getMessage() + "\n");
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(500)
                     .withBody("{\"error\": \"Failed to submit score.\"}");
