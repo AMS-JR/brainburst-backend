@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.time.Instant;
 import java.util.Map;
@@ -26,7 +28,7 @@ public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequest
             logger.log("Received score submission: " + event.getBody() + "\n");
 
             logger.log("ENVIRONMENT VARIABLES: " + gson.toJson(System.getenv()));
-            logger.log("CONTEXT: " + gson.toJson(context));
+            logger.log("CONTEXT: " + gson.toJson(ctx));
             // process event
             logger.log("EVENT: " + gson.toJson(event));
 
