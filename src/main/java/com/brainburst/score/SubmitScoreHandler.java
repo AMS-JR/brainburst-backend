@@ -8,63 +8,57 @@ import com.brainburst.datasource.DataSourceHandler;
 import com.brainburst.notification.EmailNotificationHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
-import java.util.*;
+import java.util.Map;
 
 public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private final EmailNotificationHandler emailHandler = EmailNotificationHandler.getInstance();
-    private final DataSourceHandler dataSourceHandler = DataSourceHandler.getInstance();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     static {
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
     }
 
-
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context ctx) {
 
-        ctx.getLogger().log("=== TEST LOG ===");
-        System.out.println("=== SYSTEM OUT LOG ===");
-        ctx.getLogger().log("Error: " + "This is a test ERROR log");
+        ctx.getLogger().log("=== Received SubmitScore request ===\n");
+
         try {
-            ctx.getLogger().log("Received score submission: " + event.getBody());
+            ctx.getLogger().log("Request Body: " + event.getBody() + "\n");
 
             Map<String, Object> input = objectMapper.readValue(event.getBody(), Map.class);
             String username = (String) input.get("user");
             int score = ((Number) input.get("score")).intValue();
             String gameLevel = (String) input.get("level");
-            String email = (String) input.get("email");
 
-            if (username == null || email == null || score < 0) {
+            if (username == null || gameLevel == null || score < 0) {
                 return new APIGatewayProxyResponseEvent()
                         .withStatusCode(400)
                         .withHeaders(Map.of("Content-Type", "application/json"))
-                        .withBody("{\"error\": \"Missing or invalid user, email, or score.\"}");
+                        .withBody("{\"error\": \"Missing or invalid user, score, or level.\"}");
             }
 
+            // Get DataSourceHandler with current context
+            DataSourceHandler dataSourceHandler = DataSourceHandler.getInstance(ctx);
 
-            String scoreId = dataSourceHandler.insertScore(
-                    username,
-                    score
-            );
+            String scoreId = dataSourceHandler.insertScore(username, score, gameLevel);
 
             if (dataSourceHandler.isInTop10(scoreId, gameLevel)) {
-
-                String message = String.format("\uD83C\uDFC6 Congratulations, %s! Your score of %d has made it to the top 10 on the leaderboard!",
-                        username, score);
-                emailHandler.sendEmail(email, "Top 10 " + gameLevel + "Leaderboard Notification", message);
-
+                String message = String.format(
+                        "\uD83C\uDFC6 Congratulations, %s! Your score of %d has made it to the top 10 on the %s leaderboard!",
+                        username, score, gameLevel
+                );
+                emailHandler.sendEmail(username, "Top 10 Leaderboard Notification", message);
             }
 
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
                     .withHeaders(Map.of("Content-Type", "application/json"))
-                    .withBody("{\"message\": \"Score submitted!\"}");
+                    .withBody("{\"message\": \"Score submitted successfully.\"}");
 
         } catch (Exception e) {
-            ctx.getLogger().log("Error: " + e.getMessage());
+            ctx.getLogger().log("Error handling request: " + e.getMessage() + "\n");
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(500)
                     .withHeaders(Map.of("Content-Type", "application/json"))
