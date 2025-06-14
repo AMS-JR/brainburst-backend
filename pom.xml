@@ -27,6 +27,13 @@
             <version>3.11.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>ses</artifactId>
+            <version>2.25.17</version> <!-- Use latest stable version -->
+        </dependency>
+
+
         <!-- DynamoDB SDK -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
