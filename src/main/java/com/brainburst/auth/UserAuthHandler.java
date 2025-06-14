@@ -2,6 +2,7 @@ package com.brainburst.auth;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.brainburst.sns.SnsHandler;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
@@ -11,6 +12,7 @@ import java.util.Map;
 public class UserAuthHandler implements RequestHandler<Map<String, Object>, Map<String, Object>> {
 
     private final DynamoDbClient db = DynamoDbClient.create();
+    private final SnsHandler snsHandler = SnsHandler.getInstance();
 
     @Override
     public Map<String, Object> handleRequest(Map<String, Object> input, Context context) {
@@ -31,10 +33,13 @@ public class UserAuthHandler implements RequestHandler<Map<String, Object>, Map<
                     ))
                     .conditionExpression("attribute_not_exists(username)")
                     .build());
+
+            snsHandler.subscribeEmailToTopic(email);
+            context.getLogger().log("User subscribed to topic " + System.getenv("SNS_TOPIC_ARN"));
         } catch (Exception e) {
             context.getLogger().log("Failed to insert user: " + e.getMessage());
         }
 
-        return input; // Must return original event
+        return input;
     }
 }
