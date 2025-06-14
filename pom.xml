@@ -34,6 +34,13 @@
             <version>2.25.18</version>
         </dependency>
 
+        <!-- SNS-->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sns</artifactId>
+            <version>2.26.6</version>
+        </dependency>
+
         <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
