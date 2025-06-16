@@ -89,7 +89,11 @@ public class GameHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
 
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
-                    .withHeaders(Map.of("Content-Type", "application/json"))
+                    .withHeaders(Map.of(
+                            "Content-Type", "application/json",
+                            "Access-Control-Allow-Origin", "*",
+                            "Access-Control-Allow-Credentials", "true"
+                    ))
                     .withBody(body);
         } catch (Exception e) {
             logger.log("Failed to generate question: " + e.getMessage() + "\n");

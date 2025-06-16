@@ -63,7 +63,11 @@ public class LeaderboardHandler implements RequestHandler<APIGatewayProxyRequest
             String jsonBody = objectMapper.writeValueAsString(result);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
-                    .withHeaders(Map.of("Content-Type", "application/json"))
+                    .withHeaders(Map.of(
+                            "Content-Type", "application/json",
+                            "Access-Control-Allow-Origin", "*",
+                            "Access-Control-Allow-Credentials", "true"
+                    ))
                     .withBody(jsonBody);
 
         } catch (Exception e) {

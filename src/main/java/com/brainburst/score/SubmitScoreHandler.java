@@ -32,7 +32,11 @@ public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequest
             if (username == null || gameLevel == null || score < 0) {
                 return new APIGatewayProxyResponseEvent()
                         .withStatusCode(400)
-                        .withHeaders(Map.of("Content-Type", "application/json"))
+                        .withHeaders(Map.of(
+                                "Content-Type", "application/json",
+                                "Access-Control-Allow-Origin", "*",
+                                "Access-Control-Allow-Credentials", "true"
+                        ))
                         .withBody("{\"error\": \"Missing or invalid user, score, or level.\"}");
             }
 
