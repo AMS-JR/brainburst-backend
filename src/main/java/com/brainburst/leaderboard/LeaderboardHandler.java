@@ -74,6 +74,11 @@ public class LeaderboardHandler implements RequestHandler<APIGatewayProxyRequest
             logger.log("Failed to get leaderboard: " + e.getMessage() + "\n");
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(500)
+                    .withHeaders(Map.of(
+                            "Content-Type", "application/json",
+                            "Access-Control-Allow-Origin", "*",
+                            "Access-Control-Allow-Credentials", "true"
+                    ))
                     .withBody("{\"error\": \"Failed to get leaderboard\"}");
         }
     }
