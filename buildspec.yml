@@ -15,5 +15,5 @@
 
   artifacts:
     files:
-      - target/brainburst-backend.jar
+      - target/brainburst-backend-1.0-SNAPSHOT.jar
     discard-paths: yes
