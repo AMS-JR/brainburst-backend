@@ -79,6 +79,10 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <finalName>brainburst-backend</finalName>
+                    <shadedArtifactAttached>false</shadedArtifactAttached>
+                </configuration>
             </plugin>
         </plugins>
     </build>
