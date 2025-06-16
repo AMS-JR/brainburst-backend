@@ -56,14 +56,22 @@ public class SubmitScoreHandler implements RequestHandler<APIGatewayProxyRequest
 
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
-                    .withHeaders(Map.of("Content-Type", "application/json"))
+                    .withHeaders(Map.of(
+                            "Content-Type", "application/json",
+                            "Access-Control-Allow-Origin", "*",
+                            "Access-Control-Allow-Credentials", "true"
+                    ))
                     .withBody("{\"message\": \"Score submitted successfully.\"}");
 
         } catch (Exception e) {
             ctx.getLogger().log("Error handling request: " + e.getMessage() + "\n");
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(500)
-                    .withHeaders(Map.of("Content-Type", "application/json"))
+                    .withHeaders(Map.of(
+                            "Content-Type", "application/json",
+                            "Access-Control-Allow-Origin", "*",
+                            "Access-Control-Allow-Credentials", "true"
+                    ))
                     .withBody("{\"error\": \"Failed to submit score.\"}");
         }
     }
