@@ -23,7 +23,7 @@ public class LeaderboardHandler implements RequestHandler<APIGatewayProxyRequest
         LambdaLogger logger = ctx.getLogger();
 
         try {
-            logger.log("Fetching leaderboard data grouped by game level...\n");
+            logger.log("Fetching leaderboard data grouped by game level2...\n");
 
             ScanResponse resp = db.scan(ScanRequest.builder()
                     .tableName(System.getenv("SCORES_TABLE"))
