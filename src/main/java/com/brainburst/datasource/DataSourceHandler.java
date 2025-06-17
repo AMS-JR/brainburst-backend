@@ -95,7 +95,7 @@ public class DataSourceHandler {
         } catch (Exception e) {
             context.getLogger().log(String.format("Failed to insert score or update user stats for user %s: %s%n", username, e.getMessage()));
 //            throw e;
-            return "false";  // remove this
+            return scoreId;  // remove this
         }
     }
 
