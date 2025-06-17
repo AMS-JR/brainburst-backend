@@ -1,21 +1,19 @@
-version: 0.2
+  version: 0.2
 
-phases:
-  install:
-    runtime-versions:
-      java: corretto21
-    commands:
-      - echo Installing dependencies
-      - mvn clean install
+  phases:
+    install:
+      runtime-versions:
+        java: corretto17
+      commands:
+        - echo Installing dependencies
+        - mvn clean install
 
-  build:
-    commands:
-      - echo Build started
-      - mvn package
-      - echo Listing JAR content
-      - jar tf target/brainburst-lambda.jar
+    build:
+      commands:
+        - echo Build started
+        - mvn package
 
-artifacts:
-  files:
-    - target/brainburst-lambda.jar
-  discard-paths: yes
+  artifacts:
+    files:
+      - target/brainburst-backend-1.0-SNAPSHOT.jar
+    discard-paths: yes
