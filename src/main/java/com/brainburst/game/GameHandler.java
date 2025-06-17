@@ -33,12 +33,12 @@ public class GameHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
         int min, max;
         switch (level) {
             case "medium":
-                min = 11; max = 100; break;
+                min = 21; max = 49; break;
             case "hard":
-                min = 101; max = 999; break;
+                min = 50; max = 100; break;
             default:
                 level = "easy"; // fallback
-                min = 0; max = 10;
+                min = 0; max = 20;
         }
 
         int a = random.nextInt(max - min + 1) + min;
