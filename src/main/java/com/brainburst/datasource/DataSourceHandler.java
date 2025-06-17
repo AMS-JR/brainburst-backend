@@ -33,6 +33,13 @@ public class DataSourceHandler {
         return instance;
     }
 
+    /**
+     * Update this Rubbish method. I need the userId to be able to update score. Note to Self
+     * @param username
+     * @param score
+     * @param level
+     * @return
+     */
     public String insertScore(String username, int score, String level) {
         String scoreId = UUID.randomUUID().toString();
         try {
@@ -87,7 +94,8 @@ public class DataSourceHandler {
 
         } catch (Exception e) {
             context.getLogger().log(String.format("Failed to insert score or update user stats for user %s: %s%n", username, e.getMessage()));
-            throw e;
+//            throw e;
+            return "false";  // remove this
         }
     }
 
