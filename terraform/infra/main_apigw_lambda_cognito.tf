@@ -78,7 +78,7 @@ data "archive_file" "submit_score_lambda_zip" {
 
 # SubmitScoreHandler7
 resource "aws_lambda_function" "submit_score_handler" {
-  function_name    = "SubmitScoreHandler7"
+  function_name    = "SubmitScoreHandler"
   handler          = "com.brainburst.score.SubmitScoreHandler::handleRequest"
   runtime          = "java17"
   role             = aws_iam_role.lambda_exec_role.arn
@@ -90,20 +90,21 @@ resource "aws_lambda_function" "submit_score_handler" {
 
   environment {
     variables = {
-      SCORES_TABLE     = "Scores7"
+      SCORES_TABLE     = "Scores"
       SES_SENDER_EMAIL = "asj.sarjo@gmail.com"
+      USERS_TABLE = "Users"
     }
   }
 
   tags = {
     Project = "BrainBurst"
-    Name    = "SubmitScoreHandler7"
+    Name    = "SubmitScoreHandler"
   }
 }
 
 # GameHandler7
 resource "aws_lambda_function" "game_handler" {
-  function_name    = "GameHandler7"
+  function_name    = "GameHandler"
   handler          = "com.brainburst.game.GameHandler::handleRequest"
   runtime          = "java17"
   role             = aws_iam_role.lambda_exec_role.arn
@@ -115,13 +116,13 @@ resource "aws_lambda_function" "game_handler" {
 
   tags = {
     Project = "BrainBurst"
-    Name    = "GameHandler7"
+    Name    = "GameHandler"
   }
 }
 
 # LeaderboardHandler7
 resource "aws_lambda_function" "leaderboard_handler" {
-  function_name    = "LeaderboardHandler7"
+  function_name    = "LeaderboardHandler"
   handler          = "com.brainburst.leaderboard.LeaderboardHandler::handleRequest"
   runtime          = "java17"
   role             = aws_iam_role.lambda_exec_role.arn
@@ -133,19 +134,19 @@ resource "aws_lambda_function" "leaderboard_handler" {
 
   environment {
     variables = {
-      SCORES_TABLE     = "Scores7"
+      SCORES_TABLE  = "Scores"
     }
   }
 
   tags = {
     Project = "BrainBurst"
-    Name    = "LeaderboardHandler7"
+    Name    = "LeaderboardHandler"
   }
 }
 
 # UserAuthHandler7
 resource "aws_lambda_function" "user_auth_handler" {
-  function_name    = "UserAuthHandler7"
+  function_name    = "UserAuthHandler"
   handler          = "com.brainburst.auth.UserAuthHandler::handleRequest"
   runtime          = "java17"
   role             = aws_iam_role.lambda_exec_role.arn
@@ -157,13 +158,13 @@ resource "aws_lambda_function" "user_auth_handler" {
 
   environment {
     variables = {
-      USERS_TABLE     = "Users7"
+      USERS_TABLE   = "Users"
     }
   }
 
   tags = {
     Project = "BrainBurst"
-    Name    = "UserAuthHandler7"
+    Name    = "UserAuthHandler"
   }
 }
 
@@ -414,7 +415,7 @@ resource "aws_s3_bucket" "jar_bucket" {
 # DynamoDB
 # DynamoDB Table for Users
 resource "aws_dynamodb_table" "users_table" {
-  name         = "Users7"
+  name         = "Users"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "userId" # Using 'email' as the Partition Key as per your schema
   range_key    = "email"  # Using 'scoreId' as the Sort Key for uniqueness per user
@@ -432,7 +433,7 @@ resource "aws_dynamodb_table" "users_table" {
 
 # DynamoDB Table for Scores
 resource "aws_dynamodb_table" "scores_table" {
-  name         = "Scores7"
+  name         = "Scores"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "scoreId" # Using 'username' as the Partition Key
   range_key    = "user"    # Using 'scoreId' as the Sort Key for uniqueness per user
